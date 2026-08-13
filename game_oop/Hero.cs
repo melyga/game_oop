@@ -106,7 +106,10 @@
             Console.WriteLine($"Герой {Name} получает урон в {monster.Strength} единиц здоровья!");
             Console.WriteLine();
             if (monster.Strength - Armor <= 0)
+            {
                 HP -= 1; // Если броня полностью поглощает урон, наносим минимальный урон в 1 единицу
+                return;
+            }     
 
             HP -= monster.Strength - Armor;
             if (HP < 0)
@@ -228,11 +231,11 @@
         {
             Console.WriteLine($"ПОЗДРАВЛЯЕМ! {Name} поднял уровень до {Level}!");
 
-            MaxHP += 15;
+            MaxHP += 20;
             HP = MaxHP;
 
-            Strength += 2;
-            Armor += 1;
+            Strength += 3;
+            Armor += 3;
         }
 
         /// <summary>

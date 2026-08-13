@@ -180,7 +180,7 @@
 
             // Шаблоны имен для разнообразия в зависимости от уровня
             string monsterName = "Гоблин";
-            if (monsterLevel > heroLevel + 5) monsterName = "Элитный Гоблин-Вожак";
+            if (monsterLevel > heroLevel + 4) monsterName = "Элитный Гоблин-Вожак";
             else if (monsterLevel < heroLevel - 5) monsterName = "Слабый Гоблин-раб";
 
             return new Monster(monsterName, hp: 35, armor: 5, strenght: 15, level: monsterLevel);
@@ -195,8 +195,8 @@
 
             // СТАТУС ГЕРОЯ
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"ГЕРОЙ: {hero.Name,-15} | Уровень: {hero.Level,-3} | Опыт: {hero.Score}/{hero.ExpToNextLevel} | Класс: {hero.ClassName} | Шанс побега: {hero.EscapeChance:F1}");
-            Console.Write($"Здоровье: {hero.HP}/{hero.MaxHP,-5} | Броня: {hero.Armor,-3} | Сила: {hero.Strength}");
+            Console.WriteLine($"ГЕРОЙ: {hero.Name} | Уровень: {hero.Level} | Опыт: {hero.Score}/{hero.ExpToNextLevel} | Класс: {hero.ClassName} | Шанс побега: {hero.EscapeChance:F1}");
+            Console.Write($"Здоровье: {hero.HP}/{hero.MaxHP} | Броня: {hero.Armor} | Сила: {hero.Strength}");
             if (hero is Warrior warrior)
             {
                 Console.Write($" | Ярость: {warrior.Rage}/100");
@@ -208,18 +208,18 @@
 
             // СТАТУС МОНСТРА
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"ВРАГ:  {monster.Name,-15} | Уровень: {monster.Level,-3}");
-            Console.WriteLine($"Здоровье: {monster.HP,-7} | Броня: {monster.Armor}");
+            Console.WriteLine($"ВРАГ:  {monster.Name} | Уровень: {monster.Level}");
+            Console.WriteLine($"Здоровье: {monster.HP} | Броня: {monster.Armor}");
             Console.ResetColor();
             Console.WriteLine("==================================================");
 
             // ИНСТРУКЦИЯ
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" [Enter] - Атаковать врага  |  [Пробел] - Исцеление (+15 HP)");
+            Console.WriteLine(" [Enter] - Атаковать врага  |  [Пробел] - Исцеление (+25 HP)");
             Console.ResetColor();
             Console.WriteLine("==================================================");
 
-            // ЖУРНАЛ БОЯ (Выводим последние 5 событий)
+            // ЖУРНАЛ БОЯ (Выводим последние 10 событий)
             Console.WriteLine("ЖУРНАЛ СОБЫТИЙ:");
             int startIdx = Math.Max(0, combatLog.Count - 10);
             for (int i = startIdx; i < combatLog.Count; i++)
