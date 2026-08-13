@@ -3,6 +3,7 @@
     internal class Program
     {
         private static List<string> combatLog = new List<string>();
+        private static Random Rand = new Random();
 
         static void Main()
         {
@@ -43,6 +44,8 @@
             Monster currentMonster = CreateMonster(hero.Level);
             AddLog($"Из темноты появляется {currentMonster.Name}!");
 
+            bool escapeFailedInThisBattle = false;
+
             // Первичная отрисовка экрана
             DrawUI(hero, currentMonster);
 
@@ -64,6 +67,8 @@
                             {
                                 AddLog($"{currentMonster.Name} повержен!");
 
+                                escapeFailedInThisBattle = false;
+
                                 // Создание нового монстра
                                 currentMonster = CreateMonster(hero.Level);
                                 AddLog($"Новый враг: {currentMonster.Name} [{currentMonster.Level} ур.] приближается!");
@@ -78,13 +83,45 @@
                             break;
 
                         case ConsoleKey.Spacebar:
-                            hero.Heal(15);
-                            AddLog($"{hero.Name} восстанавливает 15 HP.");
+                            hero.Heal(25);
+                            AddLog($"{hero.Name} восстанавливает 25 HP.");
 
                             // Монстр все равно бьет, пока игрок лечится
                             AddLog($"{currentMonster.Name} воспользовался моментом и атаковал!");
                             hero.TakeDamage(currentMonster);
 
+                            actionTaken = true;
+                            break;
+
+                        case ConsoleKey.Escape:
+                            if (escapeFailedInThisBattle)
+                            {
+                                AddLog("Путь к отступлению отрезан! Вы не можете сбежать!");
+                            }
+                            else
+                            {
+                                double currentEscapeChance = hero.EscapeChance;
+                                AddLog($"Попытка побега (Шанс: {currentEscapeChance:F1}%)...");
+
+                                if (Rand.NextDouble() * 100 < currentEscapeChance)
+                                {
+                                    AddLog("Успех! Вы успешно убежали от монстра!");
+
+                                    escapeFailedInThisBattle = false;
+
+                                    currentMonster = CreateMonster(hero.Level);
+                                    AddLog($"Вы забрели в другую комнату. Там вас ждет {currentMonster.Name}!");
+                                }
+                                else
+                                {
+                                    AddLog("Провал! Не удалось убежать!");
+
+                                    escapeFailedInThisBattle = true;
+
+                                    AddLog($"{currentMonster.Name} перехватывает вас, зажимает в угол и бьет в спину!");
+                                    hero.TakeDamage(currentMonster);
+                                }
+                            }
                             actionTaken = true;
                             break;
 
@@ -125,13 +162,13 @@
 
             if (chance <= 75) // 75% шанс на диапазон +-5
             {
-                int offset = rand.Next(-5, 6);
+                int offset = rand.Next(-5, 5);
                 monsterLevel = heroLevel + offset;
             }
             else // 25% шанс на диапазон от 5 до 10 в любую сторону
             {
                 bool isStronger = rand.Next(0, 2) == 1;
-                int offset = isStronger ? rand.Next(6, 11) : rand.Next(-10, -5);
+                int offset = isStronger ? rand.Next(5, 8) : rand.Next(-7, -5);
                 monsterLevel = heroLevel + offset;
             }
 
@@ -158,8 +195,14 @@
 
             // СТАТУС ГЕРОЯ
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"ГЕРОЙ: {hero.Name,-15} | Уровень: {hero.Level,-3} | Опыт: {hero.Score}/{hero.ExpToNextLevel}");
-            Console.WriteLine($"Здоровье: {hero.HP}/{hero.MaxHP,-5} | Броня: {hero.Armor,-3} | Сила: {hero.Strength}");
+            Console.WriteLine($"ГЕРОЙ: {hero.Name,-15} | Уровень: {hero.Level,-3} | Опыт: {hero.Score}/{hero.ExpToNextLevel} | Класс: {hero.ClassName} | Шанс побега: {hero.EscapeChance:F1}");
+            Console.Write($"Здоровье: {hero.HP}/{hero.MaxHP,-5} | Броня: {hero.Armor,-3} | Сила: {hero.Strength}");
+            if (hero is Warrior warrior)
+            {
+                Console.Write($" | Ярость: {warrior.Rage}/100");
+            }
+            Console.WriteLine();
+
             Console.ResetColor();
             Console.WriteLine("--------------------------------------------------");
 
@@ -178,7 +221,7 @@
 
             // ЖУРНАЛ БОЯ (Выводим последние 5 событий)
             Console.WriteLine("ЖУРНАЛ СОБЫТИЙ:");
-            int startIdx = Math.Max(0, combatLog.Count - 5);
+            int startIdx = Math.Max(0, combatLog.Count - 10);
             for (int i = startIdx; i < combatLog.Count; i++)
             {
                 Console.WriteLine($" {combatLog[i]}");

@@ -8,7 +8,7 @@
         /// Создает героя с направлением в Разбойника. 
         /// Уникальность класса - при первом ударе по монстру урон проходит в 1.5 раза выше чем обычно, но при повторной атаке по тому же монстру урон будет обычным. Разбойник имеет малый разовый урон, но средний шанс критического удара и огромный урон от критического удара.
         /// </summary>
-        public Bandit(string name, float critDamage = 200, float critRate = 75)
+        public Bandit(string name, float critDamage = 250, float critRate = 75)
             : base(name, hp: 100, strength: 5, agility: 15, score: 0, maxHP: 150, critDamage, critRate, armor: 7)
         { }
 

@@ -6,7 +6,7 @@
         /// Создает героя с направлением в Лучника.
         /// Уникальность класса - высокий шанс критического удара, высокий урон от критического удара и возможность проигнорировать часть брони противника.
         /// </summary>
-        public Archer(string name, float critDamage = 75, float critRate = 15)
+        public Archer(string name, float critDamage = 75, float critRate = 20)
         : base(name, hp: 100, strength: 22, agility: 15, score: 0, maxHP: 150, critDamage, critRate, armor: 5)
         { }
 

@@ -57,6 +57,27 @@
         /// </summary>
         public float CritRate { get; private set; }
 
+        /// <summary>
+        /// Шанс на побег от сильного врага
+        /// </summary>
+        public double EscapeChance
+        {
+            get
+            {
+                double baseChance = 25.0; // Начальный шанс побега 25%
+
+                // Прирост уменьшается на 0.1% за каждый шаг. На 30-м шаге прирост станет равен 0%.
+                // Ограничиваем ловкость числом 30 для расчета, чтобы шанс не начал падать.
+                int effectiveAgility = Math.Min(Agility, 30);
+
+                double agilityBonus = effectiveAgility * (3.0 - (effectiveAgility - 1) * 0.1 / 2.0);
+
+                double finalChance = baseChance + agilityBonus;
+
+                return Math.Min(finalChance, 75.0);
+            }
+        }
+
         public bool IsAlive => HP > 0;
 
         protected Random Rand = new Random();
