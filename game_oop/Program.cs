@@ -2,57 +2,193 @@
 {
     internal class Program
     {
+        private static List<string> combatLog = new List<string>();
+
         static void Main()
         {
-            Hero hero = new Hero(
-                name: "Gabriel",
-                hp: 100,
-                strength: 8,
-                agility: 5,
-                score: 0,
-                maxHP: 150
-                );
-            DisplayHeroStats(hero);
-            Console.WriteLine();
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Hero hero;
 
-            Monster goblin = new(
-                name: "Gobline",
-                hp: 15,
-                armor: 3
-                );
-            Console.WriteLine($"Из темноты выходит {goblin.Name} (Здоровье: {goblin.HP}, Броня: {goblin.Armor})");
-            Console.WriteLine();
+            Console.Clear();
+            Console.WriteLine("==================================================");
+            Console.WriteLine("           ДОБРО ПОЖАЛОВАТЬ В CONSOLE RPG         ");
+            Console.WriteLine("==================================================");
 
-            Monster ork = new(
-                name: "Ork",
-                hp: 80,
-                armor: 15
-                );
-            Console.WriteLine($"Из подземелья выходит {ork.Name} (Здоровье: {ork.HP}, Броня: {ork.Armor})");
-            Console.WriteLine();
+            Console.Write("Введите имя вашего героя: ");
+            string name = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(name)) name = "Безымянный";
 
-            hero.TakeDamage(30);
-            DisplayHeroStats(hero);
-            Console.WriteLine();
+            Console.WriteLine("Выберите класс героя:");
+            Console.WriteLine(" 1: Воин");
+            Console.WriteLine(" 2: Лучник");
+            Console.WriteLine(" 3: Маг");
+            Console.WriteLine(" 4: Разбойник");
+            Console.Write("Ваш выбор (1-4): ");
+            string choise = Console.ReadLine();
 
-            hero.Heal(160);
-            DisplayHeroStats(hero);
-            Console.WriteLine();
+            switch (choise)
+            {
+                case "1": hero = new Warrior(name); break;
+                case "2": hero = new Archer(name); break;
+                case "3": hero = new Mage(name); break;
+                case "4": hero = new Bandit(name); break;
+                default:
+                    Console.WriteLine("Неверный выбор. По умолчанию выбран Воин.");
+                    hero = new Warrior(name);
+                    Thread.Sleep(1000);
+                    break;
+            }
 
-            hero.TakeDamage(150);
-            DisplayHeroStats(hero);
+            // Создаем первого монстра
+            Monster currentMonster = CreateMonster(hero.Level);
+            AddLog($"Из темноты появляется {currentMonster.Name}!");
+
+            // Первичная отрисовка экрана
+            DrawUI(hero, currentMonster);
+
+            while (hero.IsAlive)
+            {
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+                    bool actionTaken = false;
+
+                    switch (keyInfo.Key)
+                    {
+                        case ConsoleKey.Enter:
+                            // Ход игрока
+                            int damage = hero.Attack(currentMonster);
+                            AddLog($"{hero.Name} наносит {damage} урона по {currentMonster.Name}.");
+
+                            if (!currentMonster.IsAlive)
+                            {
+                                AddLog($"{currentMonster.Name} повержен!");
+
+                                // Создание нового монстра
+                                currentMonster = CreateMonster(hero.Level);
+                                AddLog($"Новый враг: {currentMonster.Name} [{currentMonster.Level} ур.] приближается!");
+                            }
+                            else
+                            {
+                                // Ответный ход монстра, если он выжил
+                                AddLog($"{currentMonster.Name} атакует в ответ!");
+                                hero.TakeDamage(currentMonster);
+                            }
+                            actionTaken = true;
+                            break;
+
+                        case ConsoleKey.Spacebar:
+                            hero.Heal(15);
+                            AddLog($"{hero.Name} восстанавливает 15 HP.");
+
+                            // Монстр все равно бьет, пока игрок лечится
+                            AddLog($"{currentMonster.Name} воспользовался моментом и атаковал!");
+                            hero.TakeDamage(currentMonster);
+
+                            actionTaken = true;
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    // Перерисовываем интерфейс только если было совершено действие
+                    if (actionTaken)
+                    {
+                        DrawUI(hero, currentMonster);
+                    }
+                }
+
+                Thread.Sleep(20);
+            }
+
+            // Экран поражения
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("==================================================");
+            Console.WriteLine("                ИГРА ОКОНЧЕНА                     ");
+            Console.WriteLine("==================================================");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine($"{hero.Name} пал в бою на {hero.Level} уровне.");
+            Console.ReadLine();
         }
 
-        static void DisplayHeroStats(Hero hero)
+        /// <summary>
+        /// Генерация монстра с жестким отсечением уровня < 1 и шансами 75%/25%
+        /// </summary>
+        static Monster CreateMonster(int heroLevel)
         {
-            Console.WriteLine($"Имя героя: {hero.Name}");
-            Console.WriteLine($"Здоровье: {hero.HP}");
-            Console.WriteLine($"Сила: {hero.Strength}");
-            Console.WriteLine($"Ловкость: {hero.Agility}");
-            Console.WriteLine($"Опыт: {hero.Score}");
-            Console.WriteLine($"Максимальное здоровье: {hero.MaxHP}");
-            string alive = hero.IsAlive ? "жив" : "мертв";
-            Console.WriteLine($"Герой: {alive}");
+            Random rand = new Random();
+            int monsterLevel;
+
+            int chance = rand.Next(1, 101);
+
+            if (chance <= 75) // 75% шанс на диапазон +-5
+            {
+                int offset = rand.Next(-5, 6);
+                monsterLevel = heroLevel + offset;
+            }
+            else // 25% шанс на диапазон от 5 до 10 в любую сторону
+            {
+                bool isStronger = rand.Next(0, 2) == 1;
+                int offset = isStronger ? rand.Next(6, 11) : rand.Next(-10, -5);
+                monsterLevel = heroLevel + offset;
+            }
+
+            // Уровень монстра не может быть меньше 1
+            if (monsterLevel < 1)
+            {
+                monsterLevel = 1;
+            }
+
+            // Шаблоны имен для разнообразия в зависимости от уровня
+            string monsterName = "Гоблин";
+            if (monsterLevel > heroLevel + 5) monsterName = "Элитный Гоблин-Вожак";
+            else if (monsterLevel < heroLevel - 5) monsterName = "Слабый Гоблин-раб";
+
+            return new Monster(monsterName, hp: 35, armor: 5, strenght: 15, level: monsterLevel);
+        }
+
+        /// <summary>
+        /// Отрисовка строгого текстового интерфейса (HUD)
+        /// </summary>
+        static void DrawUI(Hero hero, Monster monster)
+        {
+            Console.Clear();
+
+            // СТАТУС ГЕРОЯ
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"ГЕРОЙ: {hero.Name,-15} | Уровень: {hero.Level,-3} | Опыт: {hero.Score}/{hero.ExpToNextLevel}");
+            Console.WriteLine($"Здоровье: {hero.HP}/{hero.MaxHP,-5} | Броня: {hero.Armor,-3} | Сила: {hero.Strength}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------------------");
+
+            // СТАТУС МОНСТРА
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"ВРАГ:  {monster.Name,-15} | Уровень: {monster.Level,-3}");
+            Console.WriteLine($"Здоровье: {monster.HP,-7} | Броня: {monster.Armor}");
+            Console.ResetColor();
+            Console.WriteLine("==================================================");
+
+            // ИНСТРУКЦИЯ
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" [Enter] - Атаковать врага  |  [Пробел] - Исцеление (+15 HP)");
+            Console.ResetColor();
+            Console.WriteLine("==================================================");
+
+            // ЖУРНАЛ БОЯ (Выводим последние 5 событий)
+            Console.WriteLine("ЖУРНАЛ СОБЫТИЙ:");
+            int startIdx = Math.Max(0, combatLog.Count - 5);
+            for (int i = startIdx; i < combatLog.Count; i++)
+            {
+                Console.WriteLine($" {combatLog[i]}");
+            }
+        }
+
+        // Помощник для добавления записей в лог боя
+        static void AddLog(string message)
+        {
+            combatLog.Add(message);
         }
     }
 }

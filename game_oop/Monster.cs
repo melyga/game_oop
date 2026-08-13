@@ -33,6 +33,7 @@
         public Monster(string name, int hp, int armor, int strenght, int level = 1)
         {
             Name = name;
+            Level = level;
             Id = Guid.NewGuid();
 
             double levelMultiplier = 1 + (level - 1) * 0.20;
