@@ -2,31 +2,63 @@
 {
     public class Monster
     {
-        public string Name { get; private set; }
-        public int HP { get; private set; }
-        public int Armor { get; private set; }
+        public string Name { get; private set; } // Имя монстра
+        public int HP { get; private set; } // Текущее здоровье монстра
+        public int Armor { get; private set; } // Броня монстра
+        public int Strength { get; private set; } // Сила монстрта
+        public int Level { get; private set; } // Уровень монстра
 
-        public bool IsAlive => HP > 0;
+        public Guid Id { get; private init; } // Уникальный идентификатор монстра (используется на данный момент для механики разбойника)
 
-        public Monster(string name, int hp, int armor)
+        public bool IsAlive => HP > 0; // Проверка, жив ли монстр (если здоровье больше 0)
+
+        /// <summary>
+        /// Подсчет опыта за убийство монстра
+        /// </summary>
+        public int ExpReward
         {
-            Name = name;
-            HP = hp;
-            Armor = armor;
+            get
+            {
+                if (IsAlive)
+                    return 0;
+
+                double survivability = HP + (Armor * 5);
+
+                double damageMultiplier = 1 + (Strength * 0.02);
+
+                return (int)(survivability * damageMultiplier);
+            }
         }
 
-        public void TakeDamage(int damage)
+        public Monster(string name, int hp, int armor, int strenght, int level = 1)
         {
-            if (damage < 0)
+            Name = name;
+            Id = Guid.NewGuid();
+
+            double levelMultiplier = 1 + (level - 1) * 0.20;
+
+            HP = (int)(hp * levelMultiplier);
+            Armor = (int)(armor * levelMultiplier);
+            Strength = (int)(strenght * levelMultiplier);
+        }
+
+        /// <summary>
+        /// Наносит монстру чистый урон (после вычета всех модификаторов брони) 
+        /// и возвращает true, если монстр умер.
+        /// </summary>
+        public bool TakeDamage(int finalDamage)
+        {
+            if (finalDamage < 0)
                 throw new ArgumentException("Урон не может быть отрицательным");
 
-            int real = damage - Armor;
-            if (real < 0)
-                real = 0;
+            HP -= finalDamage;
 
-            HP -= real;
-            if (HP < 0)
+            if (HP <= 0)
+            {
                 HP = 0;
+                return true; // Монстр погиб
+            }
+            return false; // Монстр жив
         }
 
         public void Heal(int heal)
