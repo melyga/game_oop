@@ -60,8 +60,6 @@
                 Console.SetCursorPosition(rightX, top + i);
                 Console.Write(statLine);
             }
-
-            // Курсор остаётся внизу, следующая итерация цикла очистит экран заново.
         }
     }
 }
