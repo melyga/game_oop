@@ -16,7 +16,7 @@ namespace Game
         {
             float healthPercent = (float)Hp / MaxHp;
             float bonus = 1f + (1f - healthPercent) * (_bonusMultiplierCap - 1f);
-            if (healthPercent < 0.2f)
+            if (healthPercent < 0.2f && Level >= 5)
             {
                 bonus *= 2f;
                 Battle.AddLog($"{Name} впадает в боевой транс! Урон удваивается!");
