@@ -5,7 +5,7 @@ namespace Game
 {
     public class Battle
     {
-        private readonly Hero _hero;
+        private Hero _hero;
         private IEnemy _currentMonster;
 
         private static readonly List<string> _combatLog = new List<string>();
@@ -46,6 +46,11 @@ namespace Game
                 _currentMonster = newMonster;
                 AddLog($"Новый враг: {newMonster.Name} [{monster.Level} ур.] приближается!");
             }
+        }
+
+        public void ReplaceHero(Hero newHero)
+        {
+            _hero = newHero;
         }
 
         public static void AddLog(string message) => _combatLog.Add(message);

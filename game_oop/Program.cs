@@ -1,7 +1,18 @@
 ﻿using Game.Heros;
 using Game.Heros.Archer;
+using Game.Heros.Archer.Super.Puper;
+using Game.Heros.Archer.Сlever;
+using Game.Heros.Archer.Сlever.Storm;
 using Game.Heros.Mage;
+using Game.Heros.Mage.Dark;
+using Game.Heros.Mage.Dark.Blood_Lich;
+using Game.Heros.Mage.Super;
+using Game.Heros.Mage.Super.Puper;
 using Game.Heros.Warrior;
+using Game.Heros.Warrior.Dread;
+using Game.Heros.Warrior.Dread.Titan;
+using Game.Heros.Warrior.Super;
+using Game.Heros.Warrior.Super.Puper;
 using Game.Monsters;
 
 namespace Game
@@ -50,6 +61,9 @@ namespace Game
 
             battle.OnEnemyDefeated += enemy =>
             {
+                hero = CheckClassEvolution(hero);
+                battle.ReplaceHero(hero);
+
                 IEnemy newMonster = CreateMonster(hero.Progress.Level);
                 battle.ReplaceMonster(newMonster);
             };
@@ -163,6 +177,72 @@ namespace Game
             if (monsterLevel < 1) monsterLevel = 1;
 
             return selected.Factory(monsterLevel);
+        }
+
+        private Hero CheckClassEvolution(Hero hero)
+        {
+            Hero newHero = hero;
+
+            if (hero.Progress.Level >= 10 && (hero.GetType() == typeof(Warrior) || hero.GetType() == typeof(Archer) || hero.GetType() == typeof(Mage)))
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("==================================================");
+                Console.WriteLine($"      ВАШ ГЕРОЙ ДОСТИГ {hero.Progress.Level} УРОВНЯ! ВЫБЕРИТЕ ПУТЬ:  ");
+                Console.WriteLine("==================================================");
+                Console.ResetColor();
+
+                if (hero is Warrior)
+                {
+                    Console.WriteLine(" 1: Супер Воин (Берсерк: Урон растет от ран)");
+                    Console.WriteLine(" 2: Страж (Танк: Урон усиливается от брони)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Dread_Warrior(hero.Name) : new Super_Warrior(hero.Name);
+                }
+                else if (hero is Archer)
+                {
+                    Console.WriteLine(" 1: Супер Лучник (Снайпер: Двойной выстрел)");
+                    Console.WriteLine(" 2: Ловчий (Пробитие: Крит полностью игнорирует броню)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Trapper_Archer(hero.Name) : new Super_Archer(hero.Name);
+                }
+                else if (hero is Mage)
+                {
+                    Console.WriteLine(" 1: Супер Маг (Чародей: Шанс дополнительной атаки)");
+                    Console.WriteLine(" 2: Тёмный Маг (Кровавый: Тратит HP ради 100% крита)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Dark_Mage(hero.Name) : new Super_Mage(hero.Name);
+                }
+            }
+
+            else if (hero.Progress.Level >= 20)
+            {
+                if (hero.GetType() == typeof(Super_Warrior)) newHero = new Super_Puper_Warrior(hero.Name);
+                else if (hero.GetType() == typeof(Dread_Warrior)) newHero = new Titan_Warrior(hero.Name);
+
+                else if (hero.GetType() == typeof(Super_Archer)) newHero = new Super_Puper_Archer(hero.Name);
+                else if (hero.GetType() == typeof(Trapper_Archer)) newHero = new Storm_Archer(hero.Name);
+
+                else if (hero.GetType() == typeof(Super_Mage)) newHero = new Super_Puper_Mage(hero.Name);
+                else if (hero.GetType() == typeof(Dark_Mage)) newHero = new Blood_Lich_Mage(hero.Name);
+            }
+
+            if (ReferenceEquals(newHero, hero))
+            {
+                return hero;
+            }
+
+            // Сообщения и начисление очков только при РЕАЛЬНОЙ смене класса
+            newHero.TransferProgressFrom(hero);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"\nВы успешно сменили класс на {newHero.ClassName}!");
+            Console.WriteLine($"Вам начислено {newHero.Score} очков прокачки ({newHero.Progress.Level}). Распределите их в меню статистики [Escape].");
+            Console.ResetColor();
+            Console.WriteLine("\nНажмите Enter, чтобы продолжить...");
+            Console.ReadLine();
+
+            return newHero;
         }
 
         public static void DrawUI(Hero hero, IEnemy enemy, List<string> combatLog)

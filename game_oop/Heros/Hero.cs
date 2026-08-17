@@ -74,7 +74,7 @@
             int levelsGained = Progress.AddExp(exp);
             if (levelsGained > 0)
             {
-                Score += levelsGained * 2;
+                Score += levelsGained * 3;
             }
         }
 
@@ -109,6 +109,14 @@
 
             Score--;
             return true;
+        }
+        public void TransferProgressFrom(Hero oldHero)
+        {
+            this.Progress = oldHero.Progress;
+
+            this.Score = oldHero.Progress.Level * 3;
+
+            this._hp = this.MaxHP;
         }
 
         public abstract string ClassName { get; }

@@ -109,7 +109,7 @@
 
             expReward *= rarityXpMult;
 
-            return Math.Max(1, (int)Math.Round(expReward));
+            return Math.Max(1, (int)Math.Round(expReward) * 2);
         }
 
         private int GetLevelDifference(int playerLevel)
