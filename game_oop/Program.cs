@@ -1,8 +1,35 @@
-﻿namespace Game
+﻿using Game.Heros;
+using Game.Heros.Archer;
+using Game.Heros.Archer.Super.Puper;
+using Game.Heros.Archer.Сlever;
+using Game.Heros.Archer.Сlever.Storm;
+using Game.Heros.Mage;
+using Game.Heros.Mage.Dark;
+using Game.Heros.Mage.Dark.Blood_Lich;
+using Game.Heros.Mage.Super;
+using Game.Heros.Mage.Super.Puper;
+using Game.Heros.Warrior;
+using Game.Heros.Warrior.Dread;
+using Game.Heros.Warrior.Dread.Titan;
+using Game.Heros.Warrior.Super;
+using Game.Heros.Warrior.Super.Puper;
+using Game.Monsters;
+
+namespace Game
 {
     internal class Program
     {
         static void Main()
+        {
+            MainGame game = new MainGame();
+            game.Run();
+        }
+    }
+
+    public class MainGame
+    {
+        readonly List<string> logStatUp = new List<string>();
+        public void Run()
         {
             Console.Clear();
             Console.WriteLine("==================================================");
@@ -17,12 +44,7 @@
             Console.WriteLine(" 1: Воин");
             Console.WriteLine(" 2: Лучник");
             Console.WriteLine(" 3: Маг");
-            Console.WriteLine(" 4: Разбойник");
-            Console.WriteLine(" 5: Берсерк");
-            Console.WriteLine(" 6: Друид");
-            Console.WriteLine(" 7: Некромант");
-            Console.WriteLine(" 8: Паладин");
-            Console.Write("Ваш выбор (1-8): ");
+            Console.Write("Ваш выбор (1-3): ");
             string choice = Console.ReadLine();
 
             Hero hero = choice switch
@@ -30,62 +52,99 @@
                 "1" => new Warrior(name),
                 "2" => new Archer(name),
                 "3" => new Mage(name),
-                "4" => new Rogue(name),
-                "5" => new Berserker(name),
-                "6" => new Druid(name),
-                "7" => new Necromancer(name),
-                "8" => new Paladin(name),
                 _ => new Warrior(name)
             };
 
-            IEnemy initialMonster = CreateMonster(hero.Level);
+            IEnemy initialMonster = CreateMonster(hero.Progress.Level);
             var battle = new Battle(hero, initialMonster);
-            AchievementManager achievementManager = new AchievementManager(hero);
+            bool seeStats = false;
 
             battle.OnEnemyDefeated += enemy =>
             {
-                IEnemy newMonster = CreateMonster(hero.Level);
+                hero = CheckClassEvolution(hero);
+                battle.ReplaceHero(hero);
+
+                IEnemy newMonster = CreateMonster(hero.Progress.Level);
                 battle.ReplaceMonster(newMonster);
             };
 
-            battle.OnEnemyDefeated += achievementManager.OnEnemyDefeated;
-
             while (hero.IsAlive)
             {
-                int totalKills = achievementManager.GetTotalKills();
-                List<string> killStats = achievementManager.GetKillStatsLines();
-                GameUI.DrawUI(hero, battle.CurrentMonster, (List<string>)battle.CombatLog, totalKills, killStats);
-
-                while (!Console.KeyAvailable)
+                if (!seeStats)
                 {
-                    Thread.Sleep(20);
+                    DrawUI(hero, battle.CurrentMonster, (List<string>)battle.CombatLog);
+
+                    while (!Console.KeyAvailable)
+                    {
+                        Thread.Sleep(20);
+                    }
+
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.Enter:
+                            battle.ProcessAttack();
+                            break;
+                        case ConsoleKey.Spacebar:
+                            hero.Heal();
+                            break;
+                        case ConsoleKey.Escape:
+                            seeStats = true;
+                            break;
+                    }
+                }
+                else
+                {
+                    DrawStat(hero);
+
+                    while (!Console.KeyAvailable)
+                    {
+                        Thread.Sleep(20);
+                    }
+
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.Escape:
+                            seeStats = false;
+                            break;
+
+                        case ConsoleKey.D1:
+                            AddLogStat(hero.TryUpgradeStat(StatType.Power)
+                                 ? "Сила успешно увеличена!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                        case ConsoleKey.D2:
+                            AddLogStat(hero.TryUpgradeStat(StatType.Armor)
+                                 ? "Защита успешно увеличена!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                        case ConsoleKey.D3:
+                            AddLogStat(hero.TryUpgradeStat(StatType.MaxHp)
+                                 ? "Здоровье успешно увеличено!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                        case ConsoleKey.D4:
+                            AddLogStat(hero.TryUpgradeStat(StatType.CritDamage)
+                                 ? "Крит. урон успешно увеличен!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                        case ConsoleKey.D5:
+                            AddLogStat(hero.TryUpgradeStat(StatType.CritRate)
+                                 ? "Крит. шанс успешно увеличен!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                        case ConsoleKey.D6:
+                            AddLogStat(hero.TryUpgradeStat(StatType.HealHP)
+                                 ? "Лечение успешно увеличено!"
+                                 : "Недостаточно очков для прокачки!");
+                            break;
+                    }
                 }
 
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                bool actionTaken = false;
-
-                switch (key.Key)
-                {
-                    case ConsoleKey.Enter:
-                        battle.ProcessAttack();
-                        actionTaken = true;
-                        break;
-                    case ConsoleKey.Spacebar:
-                        battle.ProcessHeal();
-                        actionTaken = true;
-                        break;
-                    case ConsoleKey.Escape:
-                        bool escaped = battle.ProcessEscape();
-                        if (escaped && hero.IsAlive)
-                        {
-                            IEnemy newMonster = CreateMonster(hero.Level);
-                            battle.ReplaceMonster(newMonster);
-                        }
-                        actionTaken = true;
-                        break;
-                }
-
-                if (actionTaken && !hero.IsAlive)
+                if (!hero.IsAlive)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -93,7 +152,7 @@
                     Console.WriteLine("                ИГРА ОКОНЧЕНА                     ");
                     Console.WriteLine("==================================================");
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine($"{hero.Name} пал в бою на {hero.Level} уровне.");
+                    Console.WriteLine($"{hero.Name} пал в бою на {hero.Progress.Level} уровне.");
                     Console.ReadLine();
                     return;
                 }
@@ -105,10 +164,9 @@
             var availableTypes = new List<(int MinLevel, Func<int, IEnemy> Factory)>
             {
                 (1, level => new Goblin(level)),
-                (3, level => new Mech_Golem(level)),
-                (5, level => new Orc(level)),
-                (8, level => new Troll(level)),
-                (10, level => new Dragon(level))
+                (5, level => new Ogre(level)),
+                (10, level => new Golem(level)),
+                (25, level => new Dragon(level)),
             };
 
             var available = availableTypes.FindAll(t => t.MinLevel <= heroLevel);
@@ -119,6 +177,181 @@
             if (monsterLevel < 1) monsterLevel = 1;
 
             return selected.Factory(monsterLevel);
+        }
+
+        private Hero CheckClassEvolution(Hero hero)
+        {
+            Hero newHero = hero;
+
+            if (hero.Progress.Level >= 10 && (hero.GetType() == typeof(Warrior) || hero.GetType() == typeof(Archer) || hero.GetType() == typeof(Mage)))
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("==================================================");
+                Console.WriteLine($"      ВАШ ГЕРОЙ ДОСТИГ {hero.Progress.Level} УРОВНЯ! ВЫБЕРИТЕ ПУТЬ:  ");
+                Console.WriteLine("==================================================");
+                Console.ResetColor();
+
+                if (hero is Warrior)
+                {
+                    Console.WriteLine(" 1: Супер Воин (Берсерк: Урон растет от ран)");
+                    Console.WriteLine(" 2: Страж (Танк: Урон усиливается от брони)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Dread_Warrior(hero.Name) : new Super_Warrior(hero.Name);
+                }
+                else if (hero is Archer)
+                {
+                    Console.WriteLine(" 1: Супер Лучник (Снайпер: Двойной выстрел)");
+                    Console.WriteLine(" 2: Ловчий (Пробитие: Крит полностью игнорирует броню)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Trapper_Archer(hero.Name) : new Super_Archer(hero.Name);
+                }
+                else if (hero is Mage)
+                {
+                    Console.WriteLine(" 1: Супер Маг (Чародей: Шанс дополнительной атаки)");
+                    Console.WriteLine(" 2: Тёмный Маг (Кровавый: Тратит HP ради 100% крита)");
+                    string choice = Console.ReadLine();
+                    newHero = choice == "2" ? new Dark_Mage(hero.Name) : new Super_Mage(hero.Name);
+                }
+            }
+
+            else if (hero.Progress.Level >= 20)
+            {
+                if (hero.GetType() == typeof(Super_Warrior)) newHero = new Super_Puper_Warrior(hero.Name);
+                else if (hero.GetType() == typeof(Dread_Warrior)) newHero = new Titan_Warrior(hero.Name);
+
+                else if (hero.GetType() == typeof(Super_Archer)) newHero = new Super_Puper_Archer(hero.Name);
+                else if (hero.GetType() == typeof(Trapper_Archer)) newHero = new Storm_Archer(hero.Name);
+
+                else if (hero.GetType() == typeof(Super_Mage)) newHero = new Super_Puper_Mage(hero.Name);
+                else if (hero.GetType() == typeof(Dark_Mage)) newHero = new Blood_Lich_Mage(hero.Name);
+            }
+
+            if (ReferenceEquals(newHero, hero))
+            {
+                return hero;
+            }
+
+            // Сообщения и начисление очков только при РЕАЛЬНОЙ смене класса
+            newHero.TransferProgressFrom(hero);
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"\nВы успешно сменили класс на {newHero.ClassName}!");
+            Console.WriteLine($"Вам начислено {newHero.Score} очков прокачки ({newHero.Progress.Level}). Распределите их в меню статистики [Escape].");
+            Console.ResetColor();
+            Console.WriteLine("\nНажмите Enter, чтобы продолжить...");
+            Console.ReadLine();
+
+            return newHero;
+        }
+
+        public static void DrawUI(Hero hero, IEnemy enemy, List<string> combatLog)
+        {
+            Console.Clear();
+
+            // Информация о герое
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"ГЕРОЙ: {hero.Name} | Класс: {hero.ClassName}");
+            Console.WriteLine($"Здоровье: {hero.HP}/{hero.MaxHP}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------------------");
+
+            // Информация о монстре
+            if (enemy is Monster monster)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"ВРАГ:  {monster.Name} | Уровень: {monster.Level}");
+                Console.WriteLine($"Здоровье: {monster.HP} | Броня: {monster.Armor} | Сила: {monster.Power}");
+                Console.ResetColor();
+                Console.WriteLine("==================================================");
+            }
+
+            // Подсказки по управлению
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine($" [Enter] - Атаковать врага  |  [SpaceBar] - Исцеление (+{hero.HealHP} HP) | [Escape] - Посмотреть статистику героя ");
+            Console.ResetColor();
+            Console.WriteLine("==================================================");
+
+            int leftX = 0;
+            int rightX = Console.WindowWidth - 30; // отступ справа для статистики
+            if (rightX < 40) rightX = 40; // минимальная ширина
+
+            int top = Console.CursorTop; // текущая строка после разделителя
+
+            // Заголовки
+            Console.SetCursorPosition(leftX, top);
+            Console.Write("ЖУРНАЛ СОБЫТИЙ:");
+            top++;
+
+            // Подготовка строк журнала (последние 10)
+            int startIdx = Math.Max(0, combatLog.Count - 10);
+            int logLines = combatLog.Count - startIdx;
+
+            for (int i = 0; i < logLines; i++)
+            {
+                string logLine = (i < logLines) ? combatLog[startIdx + i] : "";
+
+                Console.SetCursorPosition(leftX, top + i);
+                Console.Write(logLine.PadRight(rightX - leftX)); // заполняем пробелами до правой колонки
+                Console.SetCursorPosition(rightX, top + i);
+            }
+        }
+
+        public void DrawStat(Hero hero)
+        {
+            Console.Clear();
+
+            // Информация о герое
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"ГЕРОЙ: {hero.Name} | Уровень: {hero.Progress.Level} | Опыт: {hero.Progress.Exp}/{hero.Progress.ExpToNextLevel} | Класс: {hero.ClassName}");
+            Console.WriteLine($"Здоровье: {hero.HP}/{hero.MaxHP} | Броня: {hero.Armor} | Сила: {hero.Power}");
+            if (hero.Score != 0)
+            {
+                Console.WriteLine($"Имеется очков прокачки {hero.Score}!");
+            }
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------------------");
+            // Подсказки по управлению
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" [Escape] - Закрыть статистику героя ");
+            if (hero.Score != 0)
+            {
+                Console.WriteLine("Выберите статистику для прокачки:");
+                Console.WriteLine(" 1: Сила + 4");
+                Console.WriteLine(" 2: Броня + 2");
+                Console.WriteLine(" 3: Здоровье + 30");
+                Console.WriteLine(" 4: Крит. удар + 5%");
+                Console.WriteLine(" 5: Крит. шанс + 1%");
+                Console.WriteLine(" 6: Лечение + 10");
+                Console.Write("Ваш выбор (1-6): ");
+            }
+
+            int leftX = 0;
+            int rightX = Console.WindowWidth - 30; // отступ справа для статистики
+            if (rightX < 40) rightX = 40; // минимальная ширина
+
+            int top = Console.CursorTop; // текущая строка после разделителя
+
+            // Заголовки
+            Console.SetCursorPosition(leftX, top);
+            Console.Write("ЖУРНАЛ СОБЫТИЙ:");
+            top++;
+
+            int startIdx = Math.Max(0, logStatUp.Count - 10);
+            int logLines = logStatUp.Count - startIdx;
+            for (int i = 0; i < logLines; i++)
+            {
+                string logLine = (i < logLines) ? logStatUp[startIdx + i] : "";
+
+                Console.SetCursorPosition(leftX, top + i);
+                Console.Write(logLine.PadRight(rightX - leftX)); // заполняем пробелами до правой колонки
+                Console.SetCursorPosition(rightX, top + i);
+            }
+        }
+
+        private void AddLogStat(string message)
+        {
+            logStatUp.Add(message);
         }
     }
 }
