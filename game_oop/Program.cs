@@ -1,8 +1,23 @@
-﻿namespace Game
+﻿using Game.Heros;
+using Game.Heros.Archer;
+using Game.Heros.Mage;
+using Game.Heros.Warrior;
+using Game.Monsters;
+
+namespace Game
 {
     internal class Program
     {
-        static void Main()
+        static void Main() 
+        {
+            MainGame game = new MainGame();
+            game.Run();
+        }
+    }
+
+    public class MainGame
+    {
+        public void Run() 
         {
             Console.Clear();
             Console.WriteLine("==================================================");
@@ -17,12 +32,7 @@
             Console.WriteLine(" 1: Воин");
             Console.WriteLine(" 2: Лучник");
             Console.WriteLine(" 3: Маг");
-            Console.WriteLine(" 4: Разбойник");
-            Console.WriteLine(" 5: Берсерк");
-            Console.WriteLine(" 6: Друид");
-            Console.WriteLine(" 7: Некромант");
-            Console.WriteLine(" 8: Паладин");
-            Console.Write("Ваш выбор (1-8): ");
+            Console.Write("Ваш выбор (1-3): ");
             string choice = Console.ReadLine();
 
             Hero hero = choice switch
@@ -30,62 +40,38 @@
                 "1" => new Warrior(name),
                 "2" => new Archer(name),
                 "3" => new Mage(name),
-                "4" => new Rogue(name),
-                "5" => new Berserker(name),
-                "6" => new Druid(name),
-                "7" => new Necromancer(name),
-                "8" => new Paladin(name),
                 _ => new Warrior(name)
             };
 
-            IEnemy initialMonster = CreateMonster(hero.Level);
+            IEnemy initialMonster = CreateMonster(hero.Progress.Level);
             var battle = new Battle(hero, initialMonster);
-            AchievementManager achievementManager = new AchievementManager(hero);
 
             battle.OnEnemyDefeated += enemy =>
             {
-                IEnemy newMonster = CreateMonster(hero.Level);
+                IEnemy newMonster = CreateMonster(hero.Progress.Level);
                 battle.ReplaceMonster(newMonster);
             };
 
-            battle.OnEnemyDefeated += achievementManager.OnEnemyDefeated;
-
             while (hero.IsAlive)
             {
-                int totalKills = achievementManager.GetTotalKills();
-                List<string> killStats = achievementManager.GetKillStatsLines();
-                GameUI.DrawUI(hero, battle.CurrentMonster, (List<string>)battle.CombatLog, totalKills, killStats);
-
                 while (!Console.KeyAvailable)
                 {
                     Thread.Sleep(20);
                 }
 
                 ConsoleKeyInfo key = Console.ReadKey(true);
-                bool actionTaken = false;
 
                 switch (key.Key)
                 {
                     case ConsoleKey.Enter:
                         battle.ProcessAttack();
-                        actionTaken = true;
                         break;
                     case ConsoleKey.Spacebar:
-                        battle.ProcessHeal();
-                        actionTaken = true;
-                        break;
-                    case ConsoleKey.Escape:
-                        bool escaped = battle.ProcessEscape();
-                        if (escaped && hero.IsAlive)
-                        {
-                            IEnemy newMonster = CreateMonster(hero.Level);
-                            battle.ReplaceMonster(newMonster);
-                        }
-                        actionTaken = true;
+                        hero.Heal();
                         break;
                 }
 
-                if (actionTaken && !hero.IsAlive)
+                if (!hero.IsAlive)
                 {
                     Console.Clear();
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -93,7 +79,7 @@
                     Console.WriteLine("                ИГРА ОКОНЧЕНА                     ");
                     Console.WriteLine("==================================================");
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine($"{hero.Name} пал в бою на {hero.Level} уровне.");
+                    Console.WriteLine($"{hero.Name} пал в бою на {hero.Progress.Level} уровне.");
                     Console.ReadLine();
                     return;
                 }
@@ -105,10 +91,6 @@
             var availableTypes = new List<(int MinLevel, Func<int, IEnemy> Factory)>
             {
                 (1, level => new Goblin(level)),
-                (3, level => new Mech_Golem(level)),
-                (5, level => new Orc(level)),
-                (8, level => new Troll(level)),
-                (10, level => new Dragon(level))
             };
 
             var available = availableTypes.FindAll(t => t.MinLevel <= heroLevel);
