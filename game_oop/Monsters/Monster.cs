@@ -1,6 +1,4 @@
-﻿using Game.Heros;
-
-namespace Game.Monsters
+﻿namespace Game.Monsters
 {
     public enum MonsterRarity
     {
@@ -15,9 +13,8 @@ namespace Game.Monsters
         public int Level { get; protected set; }
         public MonsterRarity Rarity { get; protected set; }
 
-        // Характеристики
         public int Armor => _armor;
-        private int _armor = 0;
+        private int _armor;
 
         public int Power => _power;
         private int _power;
@@ -27,40 +24,55 @@ namespace Game.Monsters
         public bool IsAlive => _hp > 0;
         public Guid Id { get; protected set; } = Guid.NewGuid();
 
-        public Monster(string name, int level, int baseHP, int basePower, int baseArmor, MonsterRarity rarity = MonsterRarity.Normal,
+        public Monster(string name, int level, int baseHP, int basePower, int baseArmor,
+                       MonsterRarity rarity = MonsterRarity.Normal,
                        float hpMultiplier = 1.0f, float dmgMultiplier = 1.0f)
         {
             Name = name;
             Level = Math.Max(1, level);
             Rarity = rarity;
 
-            // Расчет характеристик при спавне
             CalculateStats(hpMultiplier, dmgMultiplier, baseHP, basePower, baseArmor);
         }
 
-        /// <summary>
-        /// Формула усиления монстра с ростом уровня
-        /// </summary>
         private void CalculateStats(float hpMult, float dmgMult, int hp, int power, int armor)
         {
-            double baseHp = hp * Math.Pow(Level, 1.25) + (15 * Level);
-            _hp = (int)(baseHp * hpMult * (int)Rarity);
+            // Коэффициенты здоровья в зависимости от редкости
+            float rarityHpBonus = Rarity switch
+            {
+                MonsterRarity.Normal => 1.0f,
+                MonsterRarity.Elite => 1.8f,
+                MonsterRarity.Boss => 3.5f,
+                _ => 1.0f
+            };
 
-            double baseDmg = power + (Level * 3.5) + Math.Pow(Level, 1.05);
-            double rarityDmgBonus = Rarity == MonsterRarity.Boss ? 2.5 : (int)Rarity;
+            // Мягкий прирост HP: +15% от базового HP и +10 ед. за каждый уровень
+            double baseHp = hp * (1.0 + 0.15 * (Level - 1)) + (10 * (Level - 1));
+            _hp = (int)(baseHp * hpMult * rarityHpBonus);
+
+            // Множитель урона за редкость
+            float rarityDmgBonus = Rarity switch
+            {
+                MonsterRarity.Normal => 1.0f,
+                MonsterRarity.Elite => 1.3f,
+                MonsterRarity.Boss => 2.0f,
+                _ => 1.0f
+            };
+
+            // Линейный прирост урона
+            double baseDmg = power + ((Level - 1) * 2.5);
             _power = (int)(baseDmg * dmgMult * rarityDmgBonus);
 
-            _armor = (int)(Level * armor * (int)Rarity);
+            // Броня растет умеренно, без прямого умножения на Rarity
+            _armor = armor + (int)((Level - 1) * 1.5f) + (int)Rarity;
         }
 
         /// <summary>
         /// Расчет опыта за убийство монстра
         /// </summary>
-        public int CalculateExpReward(Hero hero)
+        public int CalculateExpReward(int playerLevel)
         {
-            int playerLevel = hero.Progress.Level;
-            int monsterLevel = Level;
-
+            int monsterLevel = this.Level; // Фикс: используем уровень текущего монстра
             int grayDifference = GetLevelDifference(playerLevel);
 
             if (monsterLevel <= playerLevel - grayDifference)
@@ -69,7 +81,6 @@ namespace Game.Monsters
             }
 
             double baseXP = (playerLevel * 5) + 35;
-
             double expReward;
 
             if (monsterLevel > playerLevel)
@@ -87,14 +98,20 @@ namespace Game.Monsters
                 expReward = baseXP * (1.0 - ((double)levelDiff / grayDifference));
             }
 
-            expReward *= (int)Rarity;
+            // Опыт за редкость
+            double rarityXpMult = Rarity switch
+            {
+                MonsterRarity.Normal => 1.0,
+                MonsterRarity.Elite => 1.5,
+                MonsterRarity.Boss => 3.0,
+                _ => 1.0
+            };
+
+            expReward *= rarityXpMult;
 
             return Math.Max(1, (int)Math.Round(expReward));
         }
 
-        /// <summary>
-        /// Определяет порог уровня в зависимости от уровня игрока
-        /// </summary>
         private int GetLevelDifference(int playerLevel)
         {
             if (playerLevel <= 5) return 5;
@@ -103,14 +120,14 @@ namespace Game.Monsters
             if (playerLevel <= 15) return 8;
             if (playerLevel <= 19) return 9;
             if (playerLevel <= 39) return 9 + (playerLevel - 20) / 10;
-            return 12; // Для 40+ уровней
+            return 12;
         }
 
         public abstract int Attack(IEnemy enemy);
 
         public virtual int TakeDamage(int damage)
         {
-            if (damage <= 0 && _hp == 0)
+            if (damage <= 0 || _hp <= 0)
                 return 0;
 
             int realDamage = damage - Armor;
@@ -120,6 +137,7 @@ namespace Game.Monsters
             _hp -= realDamage;
             if (_hp < 0)
                 _hp = 0;
+
             return realDamage;
         }
     }
