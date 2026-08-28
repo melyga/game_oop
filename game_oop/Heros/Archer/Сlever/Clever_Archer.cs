@@ -1,10 +1,14 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Archer.Сlever
 {
-    public class Trapper_Archer : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+/*    public class Clever_Archer : Hero
     {
-        public Trapper_Archer(string name)
+        public Clever_Archer(string name)
             : base(name, hp: 120, maxHp: 120, power: 20, critDamage: 80, critRate: 60, armor: 7) { }
 
         public override int Attack(IEnemy enemy)
@@ -32,6 +36,16 @@ namespace Game.Heros.Archer.Сlever
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Ловчий";
-    }
+    }*/
 }

@@ -1,4 +1,5 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Warrior
 {
@@ -15,10 +16,11 @@ namespace Game.Heros.Warrior
 
             if (enemy is Monster monster)
             {
-                damage = monster.TakeDamage(CalculateCrit());
+                int bonusPower = equippedItems.Values.SelectMany(list => list).Sum(item => item.BonusPower);
+                damage = monster.TakeDamage(CalculateCrit() + bonusPower);
                 if (!monster.IsAlive)
                 {
-                    AddExperience(monster.CalculateExpReward(Progress.Level));
+                    HandleMonsterDefeat(monster);
                 }
             }
 
@@ -36,6 +38,16 @@ namespace Game.Heros.Warrior
 
             return HealHP;
         }
+
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
 
         public override string ClassName => "Воин";
     }

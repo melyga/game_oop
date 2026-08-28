@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Mage.Super.Puper
 {
-    public class Super_Puper_Mage : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+    /*public class Super_Puper_Mage : Hero
     {
         // Переменная для хранения накопленного бонуса силы от оверхила
         private int _bonusPower = 0;
@@ -49,10 +53,20 @@ namespace Game.Heros.Mage.Super.Puper
             _hp = potentialHp;
             return HealHP;
         }
-        
+
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         // В UI для прикола отображается есть ли прибавок силы
         public override string ClassName => _bonusPower > 0
             ? $"Супер Пупер Маг (+{_bonusPower} Силы)"
             : "Супер Пупер Маг";
-    }
+    }*/
 }

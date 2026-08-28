@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Archer.Сlever.Storm
 {
-    public class Storm_Archer : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+/*    public class Storm_Archer : Hero
     {
         public Storm_Archer(string name)
             : base(name, hp: 130, maxHp: 130, power: 18, critDamage: 70, critRate: 45, armor: 8) { }
@@ -35,6 +39,16 @@ namespace Game.Heros.Archer.Сlever.Storm
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Штормовой Лучник";
-    }
+    }*/
 }

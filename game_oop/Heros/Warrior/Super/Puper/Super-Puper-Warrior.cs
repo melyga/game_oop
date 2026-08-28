@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Warrior.Super.Puper
 {
-    public class Super_Puper_Warrior : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+   /* public class Super_Puper_Warrior : Hero
     {
         public Super_Puper_Warrior(string name)
             : base(name, hp: 220, maxHp: 220, power: 22, critDamage: 75, critRate: 20, armor: 18) { }
@@ -34,6 +38,16 @@ namespace Game.Heros.Warrior.Super.Puper
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Супер Пупер Воин";
-    }
+    }*/
 }

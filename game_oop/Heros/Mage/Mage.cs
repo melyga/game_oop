@@ -1,4 +1,5 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Mage
 {
@@ -18,7 +19,7 @@ namespace Game.Heros.Mage
                 damage = monster.TakeDamage(CalculateCrit(monster.Armor)); // Отправляет броню чтобы ее компенсировать в уроне так как маг игнорирует всю броню
                 if (!monster.IsAlive)
                 {
-                    AddExperience(monster.CalculateExpReward(Progress.Level));
+                    HandleMonsterDefeat(monster);
                 }
             }
 
@@ -36,6 +37,16 @@ namespace Game.Heros.Mage
 
             return HealHP;
         }
+
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
 
         public override string ClassName => "Маг";
     }

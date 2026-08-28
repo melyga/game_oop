@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Warrior.Super
 {
-    public class Super_Warrior : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+/*    public class Super_Warrior : Hero
     {
         public Super_Warrior(string name)
             : base(name, hp: 160, maxHp: 160, power: 15, critDamage: 60, critRate: 15, armor: 12) { }
@@ -29,7 +33,16 @@ namespace Game.Heros.Warrior.Super
             _hp = Math.Min(MaxHP, _hp + HealHP);
             return HealHP;
         }
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
 
         public override string ClassName => "Супер Воин";
-    }
+    }*/
 }

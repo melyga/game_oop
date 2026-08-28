@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Warrior.Dread.Titan
 {
-    public class Titan_Warrior : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+    /*public class Titan_Warrior : Hero
     {
         public Titan_Warrior(string name)
             : base(name, hp: 250, maxHp: 250, power: 15, critDamage: 50, critRate: 10, armor: 25) { }
@@ -32,6 +36,16 @@ namespace Game.Heros.Warrior.Dread.Titan
             return totalHeal;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Титанический Воин";
-    }
+    }*/
 }

@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Archer
 {
-    public class Super_Archer : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+ /*   public class Super_Archer : Hero
     {
         public Super_Archer(string name)
             : base(name, hp: 120, maxHp: 120, power: 22, critDamage: 85, critRate: 55, armor: 6) { }
@@ -34,6 +38,16 @@ namespace Game.Heros.Archer
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Супер Лучник";
-    }
+    }*/
 }

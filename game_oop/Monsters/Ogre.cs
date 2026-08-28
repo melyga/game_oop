@@ -11,5 +11,7 @@ namespace Game.Monsters
         {
             return enemy is Hero hero ? hero.TakeDamage(Power) : 0;
         }
+
+        protected override string BuildBossName(string baseName) => "Вождь огров";
     }
 }

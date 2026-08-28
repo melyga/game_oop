@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Mage.Dark.Blood_Lich
 {
-    public class Blood_Lich_Mage : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+    /*public class Blood_Lich_Mage : Hero
     {
         public Blood_Lich_Mage(string name)
             : base(name, hp: 110, maxHp: 110, power: 35, critDamage: 120, critRate: 100, armor: 5) { }
@@ -35,6 +39,16 @@ namespace Game.Heros.Mage.Dark.Blood_Lich
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Кровавый Лич";
-    }
+    }*/
 }

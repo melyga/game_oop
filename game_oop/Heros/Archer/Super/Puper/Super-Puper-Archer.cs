@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Archer.Super.Puper
 {
-    public class Super_Puper_Archer : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+/*    public class Super_Puper_Archer : Hero
     {
         public Super_Puper_Archer(string name)
             : base(name, hp: 140, maxHp: 140, power: 28, critDamage: 100, critRate: 65, armor: 8) { }
@@ -36,6 +40,16 @@ namespace Game.Heros.Archer.Super.Puper
             return totalDamage;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override int Heal()
         {
             _hp = Math.Min(MaxHP, _hp + HealHP);
@@ -43,5 +57,5 @@ namespace Game.Heros.Archer.Super.Puper
         }
 
         public override string ClassName => "Супер Пупер Лучник";
-    }
+    }*/
 }

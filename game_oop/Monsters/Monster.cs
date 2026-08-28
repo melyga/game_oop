@@ -24,20 +24,32 @@
         public bool IsAlive => _hp > 0;
         public Guid Id { get; protected set; } = Guid.NewGuid();
 
+        public bool IsBoss => Rarity == MonsterRarity.Boss;
+
         public Monster(string name, int level, int baseHP, int basePower, int baseArmor,
                        MonsterRarity rarity = MonsterRarity.Normal,
                        float hpMultiplier = 1.0f, float dmgMultiplier = 1.0f)
         {
-            Name = name;
             Level = Math.Max(1, level);
             Rarity = rarity;
+            // Если монстру выпала редкость "Босс" - зовем его особым именем
+            Name = Rarity == MonsterRarity.Boss ? BuildBossName(name) : name;
 
             CalculateStats(hpMultiplier, dmgMultiplier, baseHP, basePower, baseArmor);
         }
 
+        protected virtual string BuildBossName(string baseName) => $"Босс {baseName}";
+
+        public static MonsterRarity RollRarity(Random rand)
+        {
+            int roll = rand.Next(100);
+            if (roll < 4) return MonsterRarity.Boss;   // 4% шанс на босса
+            if (roll < 24) return MonsterRarity.Elite; // 20% шанс на элитного монстра
+            return MonsterRarity.Normal;               // 76% шанс на обычного монстра
+        }
+
         private void CalculateStats(float hpMult, float dmgMult, int hp, int power, int armor)
         {
-            // Коэффициенты здоровья в зависимости от редкости
             float rarityHpBonus = Rarity switch
             {
                 MonsterRarity.Normal => 1.0f,
@@ -46,11 +58,9 @@
                 _ => 1.0f
             };
 
-            // Мягкий прирост HP: +15% от базового HP и +10 ед. за каждый уровень
             double baseHp = hp * (1.0 + 0.15 * (Level - 1)) + (10 * (Level - 1));
             _hp = (int)(baseHp * hpMult * rarityHpBonus);
 
-            // Множитель урона за редкость
             float rarityDmgBonus = Rarity switch
             {
                 MonsterRarity.Normal => 1.0f,
@@ -59,11 +69,9 @@
                 _ => 1.0f
             };
 
-            // Линейный прирост урона
             double baseDmg = power + ((Level - 1) * 2.5);
             _power = (int)(baseDmg * dmgMult * rarityDmgBonus);
 
-            // Броня растет умеренно, без прямого умножения на Rarity
             _armor = armor + (int)((Level - 1) * 1.5f) + (int)Rarity;
         }
 
@@ -72,7 +80,7 @@
         /// </summary>
         public int CalculateExpReward(int playerLevel)
         {
-            int monsterLevel = this.Level; // Фикс: используем уровень текущего монстра
+            int monsterLevel = this.Level;
             int grayDifference = GetLevelDifference(playerLevel);
 
             if (monsterLevel <= playerLevel - grayDifference)
@@ -98,7 +106,6 @@
                 expReward = baseXP * (1.0 - ((double)levelDiff / grayDifference));
             }
 
-            // Опыт за редкость
             double rarityXpMult = Rarity switch
             {
                 MonsterRarity.Normal => 1.0,
@@ -109,7 +116,7 @@
 
             expReward *= rarityXpMult;
 
-            return Math.Max(1, (int)Math.Round(expReward) * 2);
+            return Math.Max(1, (int)Math.Round(expReward));
         }
 
         private int GetLevelDifference(int playerLevel)

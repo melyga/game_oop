@@ -1,8 +1,12 @@
-﻿using Game.Monsters;
+﻿using Game.Equipment;
+using Game.Monsters;
 
 namespace Game.Heros.Mage.Dark
 {
-    public class Dark_Mage : Hero
+    /// <summary>
+    /// Не используется
+    /// </summary>
+   /* public class Dark_Mage : Hero
     {
         public Dark_Mage(string name)
             : base(name, hp: 90, maxHp: 90, power: 28, critDamage: 100, critRate: 100, armor: 3) { }
@@ -31,6 +35,16 @@ namespace Game.Heros.Mage.Dark
             return HealHP;
         }
 
+        protected override HashSet<TypeEquipment> AllowedEquipment => new HashSet<TypeEquipment>
+        {
+            TypeEquipment.Helmet,
+            TypeEquipment.Breastplate,
+            TypeEquipment.Boots,
+            TypeEquipment.Sword,
+            TypeEquipment.Shield,
+            TypeEquipment.Ring,
+        };
+
         public override string ClassName => "Тёмный Маг";
-    }
+    }*/
 }
